@@ -1,0 +1,9 @@
+@import "../variables/size.module";
+
+// 底部导航栏
+.adm-tab-bar {
+  position: fixed;
+  bottom: 0;
+  width: $screen-width;
+  padding: 0.5rem 0;
+}
