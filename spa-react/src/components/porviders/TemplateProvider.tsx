@@ -1,17 +1,21 @@
 import React from "react"
+import { useNavigate } from "react-router-dom"
 import { Badge, NavBar, SafeArea, TabBar } from "antd-mobile"
 import {
+  SearchOutline,
   AppOutline,
   MessageOutline,
   MessageFill,
   UnorderedListOutline,
   UserOutline,
 } from "antd-mobile-icons"
-import { ProviderProps } from "interfaces/common/props"
+import { ProviderProps } from "interfaces/__components/props"
 
 export default React.memo(function TemplateProvider({
   children,
 }: ProviderProps) {
+  const navigate = useNavigate()
+
   const tabs = [
     {
       key: "home",
@@ -48,7 +52,15 @@ export default React.memo(function TemplateProvider({
 
       <div>
         {/* 顶部导航栏 */}
-        <NavBar back={"返回"} onBack={() => console.log("back")}>
+        <NavBar
+          back={"返回"}
+          onBack={() => navigate(-1)}
+          right={
+            <div style={{ fontSize: 24 }} onClick={() => navigate("/search")}>
+              <SearchOutline />
+            </div>
+          }
+        >
           <div>Music Player 标题</div>
         </NavBar>
 

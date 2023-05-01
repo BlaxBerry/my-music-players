@@ -5,12 +5,12 @@ import RouteView from "./routes/RouteView"
 
 export default function App() {
   return (
-    <ThemeProvider>
-      <TemplateProvider>
-        <BrowserRouter>
+    <BrowserRouter>
+      <ThemeProvider>
+        <TemplateProvider>
           <RouteView />
-        </BrowserRouter>
-      </TemplateProvider>
-    </ThemeProvider>
+        </TemplateProvider>
+      </ThemeProvider>
+    </BrowserRouter>
   )
 }

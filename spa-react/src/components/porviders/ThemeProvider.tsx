@@ -3,8 +3,8 @@ import { ConfigProvider } from "antd-mobile"
 import enUS from "antd-mobile/es/locales/en-US"
 import jaJP from "antd-mobile/es/locales/ja-JP"
 import zhCN from "antd-mobile/es/locales/zh-CN"
-import { ProviderProps } from "interfaces/common/props"
-import Color from "styles/variables/_color.module.scss"
+import { ProviderProps } from "interfaces/__components/props"
+import Color from "styles/variables/__color.module.scss"
 
 export default React.memo(function ThemeProvider({ children }: ProviderProps) {
   const [isDarkMode] = useState<boolean>(true)

@@ -16,7 +16,6 @@ export default defineConfig(async () => {
         utils: "/src/utils",
         interfaces: "src/interfaces",
         types: "src/types",
-        apis: "src/apis",
       },
     },
   }
