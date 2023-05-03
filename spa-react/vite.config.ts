@@ -8,11 +8,11 @@ export default defineConfig(async () => {
 
     resolve: {
       alias: {
+        src: "/src",
         components: "/src/components",
-        styles: "/src/styles",
         pages: "/src/pages",
+        styles: "/src/styles",
         hooks: "/src/hooks",
-        asstes: "src/assets",
         utils: "/src/utils",
         interfaces: "src/interfaces",
         types: "src/types",

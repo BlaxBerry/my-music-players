@@ -1,0 +1,9 @@
+.my-image-wrap {
+  position: relative;
+
+  .mask {
+    position: absolute;
+    bottom: 0;
+    padding: 1rem 2rem 1rem 1rem;
+  }
+}

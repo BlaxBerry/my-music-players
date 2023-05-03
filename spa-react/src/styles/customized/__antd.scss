@@ -7,3 +7,9 @@
   width: $screen-width;
   padding: 0.5rem 0;
 }
+
+// 弹出层
+.adm-popup-body {
+  left: auto !important;
+  max-width: $screen-width !important;
+}

@@ -1,20 +1,26 @@
-import React from "react"
-import { useNavigate } from "react-router-dom"
+import React, { useState } from "react"
+// import { useNavigate } from "react-router-dom"
 import { Badge, NavBar, SafeArea, TabBar } from "antd-mobile"
 import {
   SearchOutline,
+  MoreOutline,
   AppOutline,
   MessageOutline,
   MessageFill,
   UnorderedListOutline,
   UserOutline,
 } from "antd-mobile-icons"
+import CustomizedPopup from "components/common/Popup"
 import { ProviderProps } from "interfaces/__components/props"
+
+const SearchContent = React.lazy(() => import("pages/Search"))
 
 export default React.memo(function TemplateProvider({
   children,
 }: ProviderProps) {
-  const navigate = useNavigate()
+  // const navigate = useNavigate()
+
+  const [showSearchPopup, setShowSearchPopup] = useState<boolean>(false)
 
   const tabs = [
     {
@@ -53,11 +59,17 @@ export default React.memo(function TemplateProvider({
       <div>
         {/* 顶部导航栏 */}
         <NavBar
-          back={"返回"}
-          onBack={() => navigate(-1)}
-          right={
-            <div style={{ fontSize: 24 }} onClick={() => navigate("/search")}>
+          backArrow={
+            <div
+              style={{ fontSize: 24 }}
+              onClick={() => setShowSearchPopup(true)}
+            >
               <SearchOutline />
+            </div>
+          }
+          right={
+            <div style={{ fontSize: 24 }}>
+              <MoreOutline />
             </div>
           }
         >
@@ -85,6 +97,14 @@ export default React.memo(function TemplateProvider({
         <SafeArea position="bottom" />
       </div> 
       */}
+
+      {/* 左侧搜索弹出层 */}
+      <CustomizedPopup
+        showPopup={showSearchPopup}
+        setShowPopup={setShowSearchPopup}
+      >
+        <SearchContent />
+      </CustomizedPopup>
     </div>
   )
 })
