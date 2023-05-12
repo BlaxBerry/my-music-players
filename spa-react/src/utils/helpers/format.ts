@@ -36,7 +36,7 @@ export function toEllipsisNumber99(num: number): string {
  * formatDuration(294000) // "04:54"
  * ```
  */
-export function formatDuration(duration: number): string {
+export function formatDuration(duration: number | string): string {
   const date = new Date(duration)
   const [, m, s] = date.toTimeString().split(" ")[0].split(":")
   return `${m}:${s}`

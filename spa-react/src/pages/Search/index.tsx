@@ -1,94 +1,126 @@
-import { useCallback, useMemo, useState } from "react"
-import React from "react"
+import React, { useEffect, useMemo, useState } from "react"
+import { SearchBar, Tabs } from "antd-mobile"
 import {
-  List,
-  SearchBar,
-  Tabs,
-  Ellipsis,
-  Badge,
-  SpinLoading,
-  Grid,
-  ErrorBlock,
-} from "antd-mobile"
-import Image from "components/common/Image"
+  SongsList,
+  AlbumsList,
+  MVsList,
+  VideosList,
+  ArtistsList,
+} from "./SearchLists"
+import { EmptyError } from "components/common/Results"
+import TermsOfService from "pages/TermsOfService"
 import useRequestSearch, {
   SEARCH_TYPES,
 } from "hooks/useRequest/useRequestSearch"
 import { SearchResult } from "interfaces/__apis/search"
-import { getSourceFromAssets } from "utils/helpers/source"
-import { toEllipsisNumber99 } from "utils/helpers/format"
 
 type SearchTabs = Array<{ title: string; key: number; content: JSX.Element }>
-
-const defaultAvatar = getSourceFromAssets("images/avatar.png")
 
 export default React.memo(function Search() {
   const [searchValue, setSearchValue] = useState<string>("")
   const [selectedType, setSelectedType] = useState<number>(SEARCH_TYPES.SONGS)
 
-  const { data, loading, error } = useRequestSearch({
+  const {
+    data: dataSource,
+    loading: fetchLoading,
+    error,
+  } = useRequestSearch({
     keyword: searchValue,
     type: Number(selectedType),
   })
 
-  console.log({ data, loading, error }, searchValue, selectedType)
+  const [dataSongs, setDataSongs] = useState<SearchResult["result"]["songs"]>()
+  const [dataAlbums, setDataAlbums] =
+    useState<SearchResult["result"]["albums"]>()
+  const [dataMVs, setDataMVs] = useState<SearchResult["result"]["mvs"]>()
+  const [dataVideos, setDataVideos] =
+    useState<SearchResult["result"]["videos"]>()
+  const [dataArtists, setDataArtists] =
+    useState<SearchResult["result"]["artists"]>()
+
+  useEffect(() => {
+    if (!dataSource?.result?.songs) return
+    const songIDs = dataSource?.result?.songs
+      ?.map((item: any) => ({ id: item.id }))
+      .reduce((pre: any, cur: any) => {
+        pre.push(cur.id)
+        return pre
+      }, [])
+    fetch(`https://autumnfish.cn/song/detail?ids=${songIDs}`)
+      .then((res) => res.json())
+      .then((data) => {
+        const result = data?.songs?.map((item: any) => ({
+          id: item.id,
+          name: item.name,
+          duration: item.dt,
+          publishTime: item.publishTime,
+          url: item.al.picUrl,
+          mvid: item.mv,
+          album: item.al,
+          artists: item.ar,
+        }))
+        setDataSongs(result)
+      })
+  }, [dataSource?.result?.songs])
+
+  useEffect(() => {
+    if (dataSource?.result?.albums) setDataAlbums(dataSource?.result?.albums)
+    if (dataSource?.result?.mvs) setDataMVs(dataSource?.result?.mvs)
+    if (dataSource?.result?.videos) setDataVideos(dataSource?.result?.videos)
+    if (dataSource?.result?.artists) setDataArtists(dataSource?.result?.artists)
+  }, [dataSource?.result?.albums, dataSource?.result?.mvs, dataSource?.result?.videos, dataSource?.result?.artists])
+
+  const isBeginningStatus = useMemo<boolean>(
+    () => dataSource === null && error === null && !fetchLoading,
+    [dataSource, fetchLoading, error]
+  )
 
   const tabs = useMemo<SearchTabs>(
     () => [
       {
         title: "歌曲",
         key: SEARCH_TYPES.SONGS,
-        content: <SongsList loading={loading} data={data?.result?.songs} />,
+        content: (
+          <SongsList data={dataSongs} loading={fetchLoading || !dataSongs} />
+        ),
       },
       {
         title: "专辑",
         key: SEARCH_TYPES.ALBUMS,
-        content: <AlbumsList loading={loading} data={data?.result?.albums} />,
+        content: (
+          <AlbumsList data={dataAlbums} loading={fetchLoading || !dataAlbums} />
+        ),
       },
       {
         title: "MV",
         key: SEARCH_TYPES.MVS,
-        content: <MVsList loading={loading} data={data?.result?.mvs} />,
+        content: <MVsList data={dataMVs} loading={fetchLoading || !dataMVs} />,
       },
       {
         title: "视频",
         key: SEARCH_TYPES.VIDEOS,
-        content: <VideosList loading={loading} data={data?.result?.videos} />,
+        content: (
+          <VideosList data={dataVideos} loading={fetchLoading || !dataVideos} />
+        ),
+      },
+      {
+        title: "歌手",
+        key: SEARCH_TYPES.ARTISTS,
+        content: (
+          <ArtistsList
+            data={dataArtists}
+            loading={fetchLoading || !dataArtists}
+          />
+        ),
       },
     ],
-    [data, loading]
-  )
-
-  const getDataTotal = useCallback(
-    (currentTab: number): React.ReactNode => {
-      // 1.
-      if (currentTab !== selectedType) null
-      else {
-        // 2.
-        if (loading) return <SpinLoading style={{ width: 15, height: 15 }} />
-        // 3.
-        else {
-          const amount = (() => {
-            const dataSrouce = data?.result
-            if (dataSrouce?.songCount) return dataSrouce["songCount"]
-            else if (dataSrouce?.albumCount) return dataSrouce["albumCount"]
-            else if (dataSrouce?.mvCount) return dataSrouce["mvCount"]
-            else if (dataSrouce?.videoCount) return dataSrouce["videoCount"]
-          })()
-          return amount && toEllipsisNumber99(amount)
-        }
-      }
-    },
-    [data?.result, loading, selectedType]
+    [dataSongs, dataAlbums, dataMVs, dataVideos, dataArtists]
   )
 
   return (
     <>
       <SearchBar
         onSearch={(val: string) => setSearchValue(val.trim())}
-        onChange={(val: string) =>
-          searchValue && val.trim() === "" && setSearchValue("")
-        }
         showCancelButton
         onClear={() => setSearchValue("")}
         placeholder="请输入内容"
@@ -104,127 +136,24 @@ export default React.memo(function Search() {
         onChange={(key: string) => setSelectedType(Number(key))}
       >
         {tabs.map(({ key, title, content }) => (
-          <Tabs.Tab
-            key={key}
-            title={
-              <Badge
-                content={getDataTotal(key)}
-                children={title}
-                color={"transparent"}
-              />
-            }
-          >
-            {loading && <p>拼命搜索中...</p>}
+          <Tabs.Tab key={key} title={title}>
+            {/*1. rejected */}
+            {!!error && <EmptyError />}
 
-            <div style={{ height: "100vh", overflowY: "scroll" }}>
-              {content}
-            </div>
+            {/* 3. resolved */}
+            {!isBeginningStatus && (
+              <div
+                style={{ height: "calc(100vh - 140px)", overflowY: "scroll" }}
+              >
+                {content}
+              </div>
+            )}
+
+            {/* 4. 注意事项 */}
+            {isBeginningStatus && <TermsOfService />}
           </Tabs.Tab>
         ))}
       </Tabs>
     </>
-  )
-})
-
-const SongsList = React.memo(function ({
-  loading,
-  data,
-}: {
-  loading: boolean
-  data: SearchResult["result"]["songs"]
-}) {
-  if (!loading && !data?.length) return <ErrorBlock status="empty" fullPage />
-  return (
-    <List>
-      {data?.map((item) => (
-        <List.Item
-          key={item.id}
-          children={<Ellipsis direction="end" content={item.name} />}
-          description={
-            <Ellipsis
-              direction="end"
-              content={item.artists.map((artist) => artist.name).join()}
-            />
-          }
-          prefix={
-            <Image
-              src={defaultAvatar}
-              style={{ borderRadius: 20 }}
-              fit="cover"
-              width={40}
-              height={40}
-            />
-          }
-        />
-      ))}
-    </List>
-  )
-})
-
-const AlbumsList = React.memo(function ({
-  loading,
-  data,
-}: {
-  loading: boolean
-  data: SearchResult["result"]["albums"]
-}) {
-  if (!loading && !data?.length) return <ErrorBlock status="empty" fullPage />
-  return (
-    <Grid columns={2} gap={4}>
-      {data?.map((item) => (
-        <Grid.Item key={item.id}>
-          {/* <Card onClick={() => { }}> */}
-          <Image src={item.blurPicUrl} width={180} height={180} fit="cover" />
-          {/* </Card> */}
-        </Grid.Item>
-      ))}
-    </Grid>
-  )
-})
-
-const MVsList = React.memo(function ({
-  loading,
-  data,
-}: {
-  loading: boolean
-  data: SearchResult["result"]["mvs"]
-}) {
-  if (!loading && !data?.length) return <ErrorBlock status="empty" fullPage />
-  return (
-    <Grid columns={1} gap={5}>
-      {data?.map((item) => (
-        <Grid.Item key={item.id}>
-          <Image
-            src={item.cover}
-            width={360}
-            height={200}
-            fit="cover"
-            title={item.name}
-            artists={item.artists.map((artist) => artist.name).join()}
-            duration={item.duration}
-            playCount={item.playCount}
-          />
-        </Grid.Item>
-      ))}
-    </Grid>
-  )
-})
-
-const VideosList = React.memo(function ({
-  loading,
-  data,
-}: {
-  loading: boolean
-  data: SearchResult["result"]["videos"]
-}) {
-  if (!loading && !data?.length) return <ErrorBlock status="empty" fullPage />
-  return (
-    <Grid columns={1} gap={5}>
-      {data?.map((item) => (
-        <Grid.Item key={item.vid}>
-          <Image src={item.coverUrl} width={360} height={200} fit="cover" />
-        </Grid.Item>
-      ))}
-    </Grid>
   )
 })

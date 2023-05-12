@@ -1,0 +1,13 @@
+// 图片转动
+.movement_playing {
+  animation: playing 10s linear infinite;
+}
+
+@keyframes playing {
+  from {
+    transform: rotate(0);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}

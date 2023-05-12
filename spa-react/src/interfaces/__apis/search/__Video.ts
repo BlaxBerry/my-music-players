@@ -3,7 +3,7 @@ export type Video = {
   title: string
   coverUrl: string
   durationms: number
-  palyTime: number
+  playTime: number
   creator: [
     {
       userId: number

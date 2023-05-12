@@ -50,6 +50,7 @@ export const SEARCH_TYPES = {
   ALBUMS: 10,
   MVS: 1004,
   VIDEOS: 1014,
+  ARTISTS: 100,
 } as const
 
 // export const SEARCH_TYPES_KEYS = {

@@ -1,0 +1,11 @@
+@mixin text-ellipsis {
+  h1,
+  h2,
+  h3,
+  p,
+  span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
