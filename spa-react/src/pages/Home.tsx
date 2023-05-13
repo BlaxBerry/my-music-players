@@ -34,7 +34,7 @@ export default function Home() {
           width={240}
           height={240}
           style={{ borderRadius: 120, marginTop: "1rem" }}
-          className={song.url ? PalyerStyles.movement_playing:''}
+          className={song.url ? PalyerStyles.movement_playing : ""}
         />
       </div>
     </>

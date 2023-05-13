@@ -1,4 +1,4 @@
-import { SEARCH_TYPES } from "hooks/useRequest/useRequestSearch"
+import { SEARCH_TYPES } from "hooks/useRequest/useSearch"
 import { Album } from "./__Album"
 import { Artist } from "./__Artist"
 import { MV } from "./__MV"

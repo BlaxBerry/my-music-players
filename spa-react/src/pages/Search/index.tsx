@@ -9,10 +9,12 @@ import {
 } from "./SearchLists"
 import { EmptyError } from "components/common/Results"
 import TermsOfService from "pages/TermsOfService"
-import useRequestSearch, {
-  SEARCH_TYPES,
-} from "hooks/useRequest/useRequestSearch"
-import { SearchResult } from "interfaces/__apis/search"
+import useRequestSearch, { SEARCH_TYPES } from "hooks/useRequest/useSearch"
+import useGetSongs from "hooks/useRequest/useGetSongs"
+import { Album } from "interfaces/__apis/search/__Album"
+import { Artist } from "interfaces/__apis/search/__Artist"
+import { Video } from "interfaces/__apis/search/__Video"
+import { MV } from "interfaces/__apis/search/__MV"
 
 type SearchTabs = Array<{ title: string; key: number; content: JSX.Element }>
 
@@ -29,39 +31,14 @@ export default React.memo(function Search() {
     type: Number(selectedType),
   })
 
-  const [dataSongs, setDataSongs] = useState<SearchResult["result"]["songs"]>()
-  const [dataAlbums, setDataAlbums] =
-    useState<SearchResult["result"]["albums"]>()
-  const [dataMVs, setDataMVs] = useState<SearchResult["result"]["mvs"]>()
-  const [dataVideos, setDataVideos] =
-    useState<SearchResult["result"]["videos"]>()
-  const [dataArtists, setDataArtists] =
-    useState<SearchResult["result"]["artists"]>()
+  const { data: dataSongs, loading: dataSongsLoading } = useGetSongs({
+    dataSource: dataSource?.result?.songs,
+  })
 
-  useEffect(() => {
-    if (!dataSource?.result?.songs) return
-    const songIDs = dataSource?.result?.songs
-      ?.map((item: any) => ({ id: item.id }))
-      .reduce((pre: any, cur: any) => {
-        pre.push(cur.id)
-        return pre
-      }, [])
-    fetch(`https://autumnfish.cn/song/detail?ids=${songIDs}`)
-      .then((res) => res.json())
-      .then((data) => {
-        const result = data?.songs?.map((item: any) => ({
-          id: item.id,
-          name: item.name,
-          duration: item.dt,
-          publishTime: item.publishTime,
-          url: item.al.picUrl,
-          mvid: item.mv,
-          album: item.al,
-          artists: item.ar,
-        }))
-        setDataSongs(result)
-      })
-  }, [dataSource?.result?.songs])
+  const [dataAlbums, setDataAlbums] = useState<Array<Album>>([])
+  const [dataMVs, setDataMVs] = useState<Array<MV>>([])
+  const [dataVideos, setDataVideos] = useState<Array<Video>>([])
+  const [dataArtists, setDataArtists] = useState<Array<Artist>>([])
 
   useEffect(() => {
     if (dataSource?.result?.albums) setDataAlbums(dataSource?.result?.albums)
@@ -80,9 +57,7 @@ export default React.memo(function Search() {
       {
         title: "歌曲",
         key: SEARCH_TYPES.SONGS,
-        content: (
-          <SongsList data={dataSongs} loading={fetchLoading || !dataSongs} />
-        ),
+        content: <SongsList data={dataSongs} loading={dataSongsLoading} />,
       },
       {
         title: "专辑",
@@ -114,7 +89,15 @@ export default React.memo(function Search() {
         ),
       },
     ],
-    [dataSongs, dataAlbums, dataMVs, dataVideos, dataArtists]
+    [
+      fetchLoading,
+      dataSongs,
+      dataSongsLoading,
+      dataAlbums,
+      dataMVs,
+      dataVideos,
+      dataArtists,
+    ]
   )
 
   return (

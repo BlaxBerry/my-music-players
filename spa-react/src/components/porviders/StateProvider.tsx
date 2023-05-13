@@ -5,12 +5,22 @@ import { Song } from "interfaces/__apis/search/__Song"
 export const ContextThemeModel = React.createContext<{
   themeModel: string
   setThemeModel: React.Dispatch<React.SetStateAction<string>>
-}>({ themeModel: "", setThemeModel: (_s) => {} })
+}>({
+  themeModel: "",
+  setThemeModel: () => {
+    /* */
+  },
+})
 
 export const ContextSong = React.createContext<{
   song: Partial<Song>
   setSong: React.Dispatch<React.SetStateAction<Partial<Song>>>
-}>({ song: {}, setSong: (_s) => {} })
+}>({
+  song: {},
+  setSong: () => {
+    /* */
+  },
+})
 
 export default React.memo(function StateProvider({ children }: ProviderProps) {
   const [themeModel, setThemeModel] = useState("")

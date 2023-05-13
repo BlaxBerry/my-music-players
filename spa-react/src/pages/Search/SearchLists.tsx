@@ -4,15 +4,15 @@ import { EmptyResult } from "components/common/Results"
 import Image from "components/common/Image"
 import LoadingMask from "components/common/Loading/LoadingMask"
 import { ContextSong } from "components/porviders/StateProvider"
-import { SearchResult } from "interfaces/__apis/search"
 import { Song } from "interfaces/__apis/search/__Song"
-import { getSourceFromAssets } from "utils/helpers/source"
 import { formatDuration } from "utils/helpers/format"
-
-const defaultAvatar = getSourceFromAssets("images/avatar.png")
+import { Album } from "interfaces/__apis/search/__Album"
+import { MV } from "interfaces/__apis/search/__MV"
+import { Video } from "interfaces/__apis/search/__Video"
+import { Artist } from "interfaces/__apis/search/__Artist"
 
 export const SongsList = React.memo<{
-  data: SearchResult["result"]["songs"]
+  data: Song[] | null
   loading: boolean
 }>(({ data, loading }) => {
   const { setSong } = React.useContext(ContextSong)
@@ -25,7 +25,7 @@ export const SongsList = React.memo<{
           id: item.id,
           name: item.name,
           artists: item.artists,
-          url: item.url || defaultAvatar,
+          url: item.url,
           src: data.data[0].url,
           duration: formatDuration(item.duration),
         })
@@ -33,7 +33,7 @@ export const SongsList = React.memo<{
   }
 
   if (loading) return <LoadingMask />
-  if (!data?.length) return <EmptyResult />
+  if (!loading && !data?.length) return <EmptyResult />
   return (
     <List>
       {data?.map((item) => (
@@ -52,7 +52,7 @@ export const SongsList = React.memo<{
           }
           prefix={
             <Image
-              src={item.url || defaultAvatar}
+              src={item.url}
               style={{ borderRadius: 20 }}
               fit="cover"
               width={40}
@@ -67,7 +67,7 @@ export const SongsList = React.memo<{
 })
 
 export const AlbumsList = React.memo<{
-  data: SearchResult["result"]["albums"]
+  data: Album[]
   loading: boolean
 }>(({ data, loading }) => {
   if (loading) return <LoadingMask />
@@ -91,7 +91,7 @@ export const AlbumsList = React.memo<{
 })
 
 export const MVsList = React.memo<{
-  data: SearchResult["result"]["mvs"]
+  data: MV[]
   loading: boolean
 }>(({ data, loading }) => {
   if (loading) return <LoadingMask />
@@ -116,7 +116,7 @@ export const MVsList = React.memo<{
 })
 
 export const VideosList = React.memo<{
-  data: SearchResult["result"]["videos"]
+  data: Video[]
   loading: boolean
 }>(({ data, loading }) => {
   if (loading) return <LoadingMask />
@@ -141,7 +141,7 @@ export const VideosList = React.memo<{
 })
 
 export const ArtistsList = React.memo<{
-  data: SearchResult["result"]["artists"]
+  data: Artist[]
   loading: boolean
 }>(({ data, loading }) => {
   if (loading) return <LoadingMask />

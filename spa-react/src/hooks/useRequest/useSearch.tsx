@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useState } from "react"
 import { SearchResult } from "interfaces/__apis/search"
-import { ResponseType } from "interfaces/__hooks/request"
+import { RequestHookResponseType } from "interfaces/__hooks/request"
 import fetchData from "utils/helpers/fetch"
 
-interface useRequestSearchSongsProps {
+interface useSearchProps {
   keyword: string
   type?: number
   limit?: number
@@ -11,18 +11,18 @@ interface useRequestSearchSongsProps {
   offset?: number
 }
 
-export type UseRequestSearchSongsResult = ResponseType<SearchResult>
+type UseSearchResult = RequestHookResponseType<SearchResult>
 
-export default function useRequestSearc({
+export default function useSearch({
   keyword,
   type = SEARCH_TYPES.SONGS,
   limit = 30,
   page = 1,
   offset = 0,
-}: useRequestSearchSongsProps) {
+}: useSearchProps) {
   const url = `https://autumnfish.cn/search?keywords=${keyword}&type=${type}&limit=${limit}&page=${page}&offset=${offset}`
 
-  const [state, setState] = useState<UseRequestSearchSongsResult>({
+  const [state, setState] = useState<UseSearchResult>({
     data: null,
     loading: false,
     error: null,
