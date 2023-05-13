@@ -24,10 +24,14 @@ export const SongsList = React.memo<{
         setSong({
           id: item.id,
           name: item.name,
-          artists: item.artists,
           url: item.url,
-          src: data.data[0].url,
-          duration: formatDuration(item.duration),
+          src: data.data[0].url, // FIXME: 不再直接传递URL、只传递id、URL在所需页面自行请求
+          duration: formatDuration(data.data[0].time),
+          album: item.album,
+          artists: item.artists?.map((a) => ({
+            id: a.id,
+            name: a.name,
+          })),
         })
       )
   }
@@ -148,36 +152,34 @@ export const ArtistsList = React.memo<{
   if (!data?.length) return <EmptyResult />
   return (
     <Grid columns={1} gap={20}>
-      {data
-        ?.sort((a, b) => b.albumSize - a.albumSize)
-        .map((item) => (
-          <Grid.Item
-            key={item.id}
+      {data.map((item) => (
+        <Grid.Item
+          key={item.id}
+          style={{
+            display: "flex",
+          }}
+        >
+          <Image
+            src={item.picUrl}
+            width={100}
+            height={100}
+            style={{ borderRadius: 50 }}
+            fit="cover"
+          />
+          <div
             style={{
               display: "flex",
+              flexDirection: "column",
+              justifyContent: "center",
+              marginLeft: "1rem",
             }}
           >
-            <Image
-              src={item.picUrl}
-              width={100}
-              height={100}
-              style={{ borderRadius: 50 }}
-              fit="cover"
-            />
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "center",
-                marginLeft: "1rem",
-              }}
-            >
-              <h2 style={{ marginBottom: "0.5rem" }}>{item.name}</h2>
-              <h4>专辑：{item.albumSize}</h4>
-              <h4>MV：{item.mvSize}</h4>
-            </div>
-          </Grid.Item>
-        ))}
+            <h2 style={{ marginBottom: "0.5rem" }}>{item.name}</h2>
+            <h4>专辑：{item.albumSize}</h4>
+            <h4>MV：{item.mvSize}</h4>
+          </div>
+        </Grid.Item>
+      ))}
     </Grid>
   )
 })

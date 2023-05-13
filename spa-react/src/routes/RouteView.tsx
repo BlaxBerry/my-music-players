@@ -1,5 +1,6 @@
 import React from "react"
 import { useRoutes } from "react-router-dom"
+import LoadingMask from "components/common/Loading/LoadingMask"
 
 const Home = React.lazy(() => import("pages/Home"))
 const NotFound = React.lazy(() => import("pages/404"))
@@ -17,8 +18,6 @@ export default React.memo(function RouteView() {
   ])
 
   return (
-    <React.Suspense fallback={<div>Loading...</div>}>
-      {routesElements}
-    </React.Suspense>
+    <React.Suspense fallback={<LoadingMask />}>{routesElements}</React.Suspense>
   )
 })
