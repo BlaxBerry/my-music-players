@@ -11,4 +11,5 @@ export type Song = {
   duration: number | string
   album: Album
   artists: Array<Artist>
+  lyric?: Array<[string, string]>
 }

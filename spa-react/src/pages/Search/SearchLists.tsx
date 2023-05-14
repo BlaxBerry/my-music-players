@@ -18,22 +18,7 @@ export const SongsList = React.memo<{
   const { setSong } = React.useContext(ContextSong)
 
   const onCick = (item: Song) => {
-    fetch(`https://autumnfish.cn/song/url?id=${item.id}`)
-      .then((response) => response.json())
-      .then((data) =>
-        setSong({
-          id: item.id,
-          name: item.name,
-          url: item.url,
-          src: data.data[0].url, // FIXME: 不再直接传递URL、只传递id、URL在所需页面自行请求
-          duration: formatDuration(data.data[0].time),
-          album: item.album,
-          artists: item.artists?.map((a) => ({
-            id: a.id,
-            name: a.name,
-          })),
-        })
-      )
+    setSong({ id: item.id })
   }
 
   if (loading) return <LoadingMask />
