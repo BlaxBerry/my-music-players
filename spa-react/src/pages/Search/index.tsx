@@ -1,5 +1,5 @@
-import React, { useEffect, useMemo, useState } from "react"
-import { SearchBar, Tabs } from "antd-mobile"
+import React, { useMemo, useState } from "react"
+import { Button, SearchBar, Tabs } from "antd-mobile"
 import {
   SongsList,
   AlbumsList,
@@ -10,11 +10,11 @@ import {
 import { EmptyError } from "components/common/Results"
 import TermsOfService from "pages/TermsOfService"
 import useRequestSearch, { SEARCH_TYPES } from "hooks/useRequest/useSearch"
-import useGetSongs from "hooks/useRequest/useGetSongs"
 import { Album } from "interfaces/__apis/search/__Album"
 import { Artist } from "interfaces/__apis/search/__Artist"
-import { Video } from "interfaces/__apis/search/__Video"
 import { MV } from "interfaces/__apis/search/__MV"
+import { Song } from "interfaces/__apis/search/__Song"
+import { Video } from "interfaces/__apis/search/__Video"
 
 type SearchTabs = Array<{ title: string; key: number; content: JSX.Element }>
 
@@ -31,21 +31,27 @@ export default React.memo(function Search() {
     type: Number(selectedType),
   })
 
-  const { data: dataSongs, loading: dataSongsLoading } = useGetSongs({
-    dataSource: dataSource?.result?.songs,
-  })
+  const dataSongs = useMemo<Song[]>(
+    () => dataSource?.result?.songs || [],
+    [dataSource?.result?.songs]
+  )
 
-  const [dataAlbums, setDataAlbums] = useState<Array<Album>>([])
-  const [dataMVs, setDataMVs] = useState<Array<MV>>([])
-  const [dataVideos, setDataVideos] = useState<Array<Video>>([])
-  const [dataArtists, setDataArtists] = useState<Array<Artist>>([])
-
-  useEffect(() => {
-    if (dataSource?.result?.albums) setDataAlbums(dataSource?.result?.albums)
-    if (dataSource?.result?.mvs) setDataMVs(dataSource?.result?.mvs)
-    if (dataSource?.result?.videos) setDataVideos(dataSource?.result?.videos)
-    if (dataSource?.result?.artists) setDataArtists(dataSource?.result?.artists)
-  }, [dataSource?.result?.albums, dataSource?.result?.mvs, dataSource?.result?.videos, dataSource?.result?.artists])
+  const dataAlbums = useMemo<Album[]>(
+    () => dataSource?.result?.albums || [],
+    [dataSource?.result?.albums]
+  )
+  const dataMVs = useMemo<MV[]>(
+    () => dataSource?.result?.mvs || [],
+    [dataSource?.result?.mvs]
+  )
+  const dataVideos = useMemo<Video[]>(
+    () => dataSource?.result?.videos || [],
+    [dataSource?.result?.videos]
+  )
+  const dataArtists = useMemo<Artist[]>(
+    () => dataSource?.result?.artists || [],
+    [dataSource?.result?.artists]
+  )
 
   const isBeginningStatus = useMemo<boolean>(
     () => dataSource === null && error === null && !fetchLoading,
@@ -57,47 +63,30 @@ export default React.memo(function Search() {
       {
         title: "歌曲",
         key: SEARCH_TYPES.SONGS,
-        content: <SongsList data={dataSongs} loading={dataSongsLoading} />,
+        content: <SongsList data={dataSongs} isLoading={fetchLoading} />,
       },
       {
         title: "专辑",
         key: SEARCH_TYPES.ALBUMS,
-        content: (
-          <AlbumsList data={dataAlbums} loading={fetchLoading || !dataAlbums} />
-        ),
+        content: <AlbumsList data={dataAlbums} isLoading={fetchLoading} />,
       },
       {
         title: "MV",
         key: SEARCH_TYPES.MVS,
-        content: <MVsList data={dataMVs} loading={fetchLoading || !dataMVs} />,
+        content: <MVsList data={dataMVs} isLoading={fetchLoading} />,
       },
       {
         title: "视频",
         key: SEARCH_TYPES.VIDEOS,
-        content: (
-          <VideosList data={dataVideos} loading={fetchLoading || !dataVideos} />
-        ),
+        content: <VideosList data={dataVideos} isLoading={fetchLoading} />,
       },
       {
         title: "歌手",
         key: SEARCH_TYPES.ARTISTS,
-        content: (
-          <ArtistsList
-            data={dataArtists}
-            loading={fetchLoading || !dataArtists}
-          />
-        ),
+        content: <ArtistsList data={dataArtists} isLoading={fetchLoading} />,
       },
     ],
-    [
-      fetchLoading,
-      dataSongs,
-      dataSongsLoading,
-      dataAlbums,
-      dataMVs,
-      dataVideos,
-      dataArtists,
-    ]
+    [fetchLoading, dataSongs, dataAlbums, dataMVs, dataVideos, dataArtists]
   )
 
   return (
@@ -129,6 +118,17 @@ export default React.memo(function Search() {
                 style={{ height: "calc(100vh - 140px)", overflowY: "scroll" }}
               >
                 {content}
+
+                {dataSource?.result?.hasMore && (
+                  <Button
+                    block
+                    onClick={() => {
+                      /*refetch*/
+                    }}
+                  >
+                    记载更多...
+                  </Button>
+                )}
               </div>
             )}
 
