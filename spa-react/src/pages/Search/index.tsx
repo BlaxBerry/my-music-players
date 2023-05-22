@@ -9,33 +9,38 @@ import {
 } from "./SearchLists"
 import { EmptyError } from "components/common/Results"
 import TermsOfService from "pages/TermsOfService"
-import useRequestSearch, { SEARCH_TYPES } from "hooks/useRequest/useSearch"
+import useRequestSearch, {
+  DEFAULT_LIMIT,
+  DEFAULT_OFFSET,
+  DEFAULT_PAGE,
+  SearchTypes,
+  UseSearchProps,
+} from "hooks/useRequest/useSearch"
 import { Album } from "interfaces/__apis/search/__Album"
 import { Artist } from "interfaces/__apis/search/__Artist"
 import { MV } from "interfaces/__apis/search/__MV"
 import { Song } from "interfaces/__apis/search/__Song"
 import { Video } from "interfaces/__apis/search/__Video"
 
-type SearchTabs = Array<{ title: string; key: number; content: JSX.Element }>
-
 export default React.memo(function Search() {
-  const [searchValue, setSearchValue] = useState<string>("")
-  const [selectedType, setSelectedType] = useState<number>(SEARCH_TYPES.SONGS)
+  const [searchProps, setSearchProps] = useState<Required<UseSearchProps>>({
+    keyword: "",
+    type: SearchTypes.Songs,
+    page: DEFAULT_PAGE,
+    limit: DEFAULT_LIMIT,
+    offset: DEFAULT_OFFSET,
+  })
 
   const {
     data: dataSource,
     loading: fetchLoading,
     error,
-  } = useRequestSearch({
-    keyword: searchValue,
-    type: Number(selectedType),
-  })
+  } = useRequestSearch(searchProps)
 
   const dataSongs = useMemo<Song[]>(
     () => dataSource?.result?.songs || [],
     [dataSource?.result?.songs]
   )
-
   const dataAlbums = useMemo<Album[]>(
     () => dataSource?.result?.albums || [],
     [dataSource?.result?.albums]
@@ -58,31 +63,37 @@ export default React.memo(function Search() {
     [dataSource, fetchLoading, error]
   )
 
-  const tabs = useMemo<SearchTabs>(
+  const tabs = useMemo<
+    Array<{
+      title: string
+      key: SearchTypes
+      content: JSX.Element
+    }>
+  >(
     () => [
       {
         title: "歌曲",
-        key: SEARCH_TYPES.SONGS,
+        key: SearchTypes.Songs,
         content: <SongsList data={dataSongs} isLoading={fetchLoading} />,
       },
       {
         title: "专辑",
-        key: SEARCH_TYPES.ALBUMS,
+        key: SearchTypes.Albums,
         content: <AlbumsList data={dataAlbums} isLoading={fetchLoading} />,
       },
       {
         title: "MV",
-        key: SEARCH_TYPES.MVS,
+        key: SearchTypes.MVs,
         content: <MVsList data={dataMVs} isLoading={fetchLoading} />,
       },
       {
         title: "视频",
-        key: SEARCH_TYPES.VIDEOS,
+        key: SearchTypes.Videos,
         content: <VideosList data={dataVideos} isLoading={fetchLoading} />,
       },
       {
         title: "歌手",
-        key: SEARCH_TYPES.ARTISTS,
+        key: SearchTypes.Artists,
         content: <ArtistsList data={dataArtists} isLoading={fetchLoading} />,
       },
     ],
@@ -92,9 +103,16 @@ export default React.memo(function Search() {
   return (
     <>
       <SearchBar
-        onSearch={(val: string) => setSearchValue(val.trim())}
+        onSearch={(val: string) =>
+          setSearchProps((s) => ({
+            ...s,
+            keyword: val.trim(),
+            page: DEFAULT_PAGE,
+            offset: DEFAULT_OFFSET,
+          }))
+        }
         showCancelButton
-        onClear={() => setSearchValue("")}
+        onClear={() => setSearchProps((s) => ({ ...s, keyword: "" }))}
         placeholder="请输入内容"
         style={{
           "--border-radius": "100px",
@@ -104,8 +122,15 @@ export default React.memo(function Search() {
       />
 
       <Tabs
-        defaultActiveKey={SEARCH_TYPES.SONGS.toString()}
-        onChange={(key: string) => setSelectedType(Number(key))}
+        defaultActiveKey={SearchTypes.Songs.toString()}
+        onChange={(key: string) =>
+          setSearchProps((s) => ({
+            ...s,
+            type: Number(key),
+            page: DEFAULT_PAGE,
+            offset: DEFAULT_OFFSET,
+          }))
+        }
       >
         {tabs.map(({ key, title, content }) => (
           <Tabs.Tab key={key} title={title}>
@@ -123,7 +148,11 @@ export default React.memo(function Search() {
                   <Button
                     block
                     onClick={() => {
-                      /*refetch*/
+                      setSearchProps((s) => ({
+                        ...s,
+                        page: s.page + 1,
+                        offset: s.page * s.limit,
+                      }))
                     }}
                   >
                     记载更多...
